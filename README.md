@@ -1,5 +1,9 @@
 # Podcatcher
 
+![Python: 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
+
 A command-line podcast manager written in Python. Subscribe to RSS feeds, track new episodes, download audio files, and mark episodes as played — all from the terminal, with no third-party dependencies.
 
 ## Features
@@ -93,7 +97,7 @@ podcatcher status darknetdiaries --count 25
 podcatcher update [--slug SLUG] [--download]
 ```
 
-Re-fetches one or all feeds to discover new episodes. Played flags and local file paths are preserved across updates.
+Re-fetches one or all feeds to discover new episodes. Played flags and local file paths are preserved across updates. **If an episode is removed from the RSS feed, its local audio file is automatically deleted.**
 
 ```bash
 podcatcher update                              # refresh all feeds
@@ -144,7 +148,7 @@ podcatcher mark-played darknetdiaries --unplayed   # mark all episodes unplayed
 podcatcher remove <slug> [-y]
 ```
 
-Removes the feed from the subscription database. Downloaded audio files on disk are **not** deleted — remove `~/.podcatcher/episodes/<slug>/` manually if needed.
+Removes the feed from the subscription database. **All downloaded audio files for that podcast are also deleted from disk.**
 
 ```bash
 podcatcher remove syntax

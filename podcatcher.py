@@ -380,17 +380,23 @@ def cmd_update(args):
         known_guids = set(feed.get("known_guids", []))
         fresh = [ep for ep in new_episodes if ep["guid"] not in known_guids]
 
-        # Preserve played and download state from existing episodes
-        played_guids = {
-            ep["guid"]
-            for ep in feed.get("episodes", [])
-            if ep.get("played")
-        }
-        local_paths = {
-            ep["guid"]: ep["local_path"]
-            for ep in feed.get("episodes", [])
-            if ep.get("local_path")
-        }
+        # Preserve played and download state from existing episodes,
+        # and clean up local files for episodes removed from the feed.
+        old_episodes = feed.get("episodes", [])
+        new_guids = {ep["guid"] for ep in new_episodes}
+
+        for ep in old_episodes:
+            if ep["guid"] not in new_guids:
+                path = ep.get("local_path")
+                if path and os.path.exists(path):
+                    print(f"  × Removing orphaned file: {os.path.basename(path)}")
+                    try:
+                        os.remove(path)
+                    except Exception as e:
+                        print(f"    [ERROR] Could not delete {path}: {e}")
+
+        played_guids = {ep["guid"] for ep in old_episodes if ep.get("played")}
+        local_paths = {ep["guid"]: ep["local_path"] for ep in old_episodes if ep.get("local_path")}
         for ep in new_episodes:
             ep["played"] = ep["guid"] in played_guids
             ep["local_path"] = local_paths.get(ep["guid"], "")
@@ -439,6 +445,17 @@ def cmd_remove(args):
 
     del feeds[slug]
     save_feeds(feeds)
+
+    # Clean up episodes directory
+    import shutil
+    path = os.path.join(EPISODES_DIR, slug)
+    if os.path.exists(path):
+        print(f"  × Deleting episode files in {path}...")
+        try:
+            shutil.rmtree(path)
+        except Exception as e:
+            print(f"    [ERROR] Could not delete {path}: {e}")
+
     print(f"  ✔ Removed '{title}'.")
 
 
@@ -692,18 +709,14 @@ def cmd_help(args):
   remove <slug> [-y]
 
   Unsubscribe from a feed. The feed's metadata and episode list are deleted
-  from ~/.podcatcher/feeds.json. Downloaded audio files on disk are NOT
-  removed — delete ~/.podcatcher/episodes/<slug>/ manually if needed.
+  from ~/.podcatcher/feeds.json. ALL downloaded audio files in
+  ~/.podcatcher/episodes/<slug>/ are also removed.
 
   Arguments:
     slug          Feed slug
 
   Options:
     -y, --yes     Skip the confirmation prompt.
-
-  Examples:
-    podcatcher remove syntax
-    podcatcher remove syntax -y
 """,
 
         "search": """\
