@@ -18,7 +18,7 @@ A command-line podcast manager written in Python. Subscribe to RSS feeds, track 
 ## Requirements
 
 - Python 3.6+
-- Linux (or any Unix-like system)
+- Linux, macOS, or any Unix-like system
 
 ## Installation
 
@@ -30,6 +30,10 @@ chmod +x podcatcher.py
 # Optional: install system-wide
 sudo cp podcatcher.py /usr/local/bin/podcatcher
 ```
+
+## Documentation
+
+For a detailed guide on all features and advanced usage, see the [User Manual](USER_MANUAL.md).
 
 ## Quick Start
 
